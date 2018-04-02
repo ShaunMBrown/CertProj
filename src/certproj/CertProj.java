@@ -3,6 +3,7 @@ package certproj;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
@@ -29,7 +30,7 @@ public class CertProj {
 		printCertificateVerification();
 
 		printCertificate();
-		
+
 		printKeys();
 
 		printSignature();
@@ -38,30 +39,38 @@ public class CertProj {
 
 	}
 
-	private static void printCertificateVerification() throws Exception {
+	private static void printCertificateVerification() {
 		System.out.println("======================================");
 		System.out.println("===========Cert Verification==========");
 		System.out.println("======================================\n");
-		System.out.println("There doesn't seem to be anything here :(");
-		Signature sig = Signature.getInstance(publicCertDetails.getX509Certificate().getSigAlgName());
-		sig.initVerify(publicCertDetails.getX509Certificate());
-		boolean verified = sig.verify(publicCertDetails.getX509Certificate().getSignature());
-		System.out.println("Verified: " + verified);
-		System.out.println("Signature: " + sig.toString());
+
+		try {
+			X509Certificate xcert = publicCertDetails.getX509Certificate();
+			xcert.verify((PublicKey) tcCertDetails.getKey());
+			System.out.println("Raghu's Certificate has been verified against the TrustCenter certificate");
+		} catch (Exception e) {
+			System.out.println("The certificate cannot be verified.");
+		}
 		System.out.println();
 	}
 
 	public static void printCertificate() {
 		System.out.println("======================================");
-		System.out.println("===========Raghu's Certificate=========");
+		System.out.println("==========Raghu's Certificate=========");
 		System.out.println("======================================\n");
-
+		X509Certificate cert = publicCertDetails.getX509Certificate();
+		System.out.println(cert);
+		System.out.println("\n======================================");
+		System.out.println("========TrustCenter Certificate=======");
+		System.out.println("======================================\n");
+		X509Certificate tcCert = tcCertDetails.getX509Certificate();
+		System.out.println(tcCert);
 		System.out.println();
 	}
 
 	/**
-	 * Prints Raghu's private and public keys from the pks and cer files
-	 * Prints the public key of the Certification Authority
+	 * Prints Raghu's private and public keys from the pks and cer files Prints the
+	 * public key of the Certification Authority
 	 */
 	public static void printKeys() {
 		System.out.println("======================================");
@@ -73,7 +82,7 @@ public class CertProj {
 		System.out.println("======================================\n");
 		System.out.println(new String(Base64.getEncoder().encode(publicCertDetails.getKey().getEncoded())));
 		System.out.println("\n======================================");
-		System.out.println("=============CA Public Key=============");
+		System.out.println("=============CA Public Key============");
 		System.out.println("======================================\n");
 		System.out.println(new String(Base64.getEncoder().encode(tcCertDetails.getKey().getEncoded())));
 		System.out.println();
@@ -83,7 +92,8 @@ public class CertProj {
 		System.out.println("======================================");
 		System.out.println("========Signature - Raghu's Cert======");
 		System.out.println("======================================\n");
-		System.out.println(new String(Base64.getEncoder().encode(publicCertDetails.getX509Certificate().getSignature())));
+		System.out
+				.println(new String(Base64.getEncoder().encode(publicCertDetails.getX509Certificate().getSignature())));
 		System.out.println();
 	}
 
